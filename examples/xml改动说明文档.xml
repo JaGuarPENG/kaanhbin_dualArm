@@ -1,0 +1,329 @@
+注：
+1.kaanhbin里的xml只允许修改，不允许运行；
+2.每次开发完成新的功能，功能的开发者将对xml的修改更新到每一个文件中
+
+2023/8/8 xxt
+old:
+<DistributeRule module="System" cmds="controller;udisk;pkg_query;prj_query;systime;reboot;language" />				
+new:
+<DistributeRule module="System" cmds="copy_files;reboot;systime;rpath_query;controller;udisk;prj_query;pkg_query;lpath_query;language;rename_files"/>
+                    
+2023/8/8 xxt
+old:
+<UserManagement name="UserManagement" op_pwd="d41d8cd98f00b204e9800998ecf8427e" en_pwd="d41d8cd98f00b204e9800998ecf8427e" ad_pwd="e10adc3949ba59abbe56e057f20f883e"/>
+new：
+<UserManagement name="UserManagement" op_pwd="670b14728ad9902aecba32e22fa4f6bd" en_pwd="670b14728ad9902aecba32e22fa4f6bd" ad_pwd="e10adc3949ba59abbe56e057f20f883e"/>
+            
+
+2023/8/10 yw
+新增单臂晶圆机功能，新建kaang_wafer.xml  
+注：增加其他有对xml修改的功能时，也要修改kaang_wafer.xml对应的节点 
+
+2323/8/10 xxt 
+修改了test分支中四个的xml里的plan的INT32和BOOL的默认值等
+
+
+2023/08/11 yw 修复bug727对xml的修改
+/----------------新增指令--------------------/
+<pauseProgram name="plan">
+    <Command __prop_name__="command" name="pause_pgm"/>
+</pauseProgram>
+/----------------新增plan指令--------------------/
+<PlanCell old_name="pause_pgm" new_name="pauseProgram" simple_desc="暂停程序" desc="暂停程序" menu="程序" interrupt="true" backward="false">
+    <ParamCellVec __prop_name__="_params"/>
+</PlanCell>
+/----------------删除func指令--------------------/
+<FuncCell name="pauseProgram" simple_desc="暂停程序" desc="暂停程序" menu="程序">
+    <VarCellVec __prop_name__="_params"/>
+</FuncCell>
+
+
+2023/08/11 yw 飞抓工艺包对xml的修改
+/------------------------分发器配置------------------------------/
+<DistributeRule module="kaanh::package::ConveyorManager" cmds="conveyor_edit;conveyor_calib;conveyor_ctrl;conveyor_query;set_conveyor_vel;get_conveyor_vel;camera_calib"/>
+
+/------------------------工艺包配置------------------------------/
+<PkgManager name="PkgManager" pkgs="Conveyor;Palletize"/>
+
+/------------------------传送带module配置------------------------------/
+<kaanh.package.ConveyorManager name="kaanh::package::ConveyorManager" queue_size="1">
+    <ConveyorPool __prop_name__="_conveyor_pool">
+        <Conveyor vel="0.20000000000000001">
+            <ConveyorInfo __prop_name__="con_info" name="con 1" motor_id="4" active="true" type="Prismatic" wobj="1" tool="0" min_x="0" max_x="0" min_y="0" max_y="0" pluse="2.88300000000000001"/>
+        </Conveyor>
+    </ConveyorPool>
+    <CameraPool __prop_name__="_camera_pool">
+        <Camera>
+            <CameraInfo __prop_name__="camera_info" ip="127.0.0.1" port="502" trig_time="1" trig_distance="0.001" trig_id="1" trig_type="Time" connect_type="ModbusTcpClient"/>
+        </Camera>
+    </CameraPool>
+</kaanh.package.ConveyorManager>
+
+
+
+/------------------------class 注册------------------------------/
+<ClassCell name="GrabData" simple_desc="传送带抓取数据" desc="传送带抓取数据" prefix="grab_data">
+    <VarCellVec __prop_name__="_vars">
+        <VarCell name="x" desc="x方向位置，单位mm" type="FLOAT" unit="mm" editable="true"/>
+        <VarCell name="y" desc="y方向位置，单位mm" type="FLOAT" unit="mm" editable="true"/>
+        <VarCell name="con_pos" desc="拍照时传送带位置" type="FLOAT" unit="mm(deg)" editable="true"/>
+        <VarCell name="state" desc="传送带抓取状态，true:可抓取，false:不可抓取，数据添加到丢失队列" type="INT32" editable="true"/>
+    </VarCellVec>
+    <FuncCellVec __prop_name__="_funcs"/>
+</ClassCell>
+
+
+/------------------------func 注册------------------------------/
+<FuncCell name="initNet" simple_desc="初始化网络" desc="初始化网络" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="camera_id" desc="相机编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="startTrigPhoto" simple_desc="开始触发拍照" desc="开始触发拍照" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="camera_id" desc="相机编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="stopTrigPhoto" simple_desc="停止触发拍照" desc="停止触发拍照" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="camera_id" desc="相机编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="cameraIsConnected" simple_desc="连接状态" desc="获取相机网络连接状态" ret_type="BOOL" ret_desc="true:连接中 false:未连接" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="camera_id" desc="相机编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="getGrabQeueData" simple_desc="获取数据" desc="检查当前是否进入抓取区域，返回抓取数据和状态" ret_type="GrabData" ret_desc="抓取数据和是否可抓取的状态" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="con_id" desc="传送带编号，从1开始" min_val="1" type="INT32" editable="true"/>
+        <VarCell name="queue_id" desc="队列编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="delteGrabQeueData" simple_desc="删除数据" desc="删除指定队列的抓取数据" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="queue_id" desc="队列编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="clearGrabQeueData" simple_desc="清空数据" desc="清空指定传送带和队列的数据" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="con_id" desc="传送带编号，从1开始" min_val="1" type="INT32" editable="true"/>
+        <VarCell name="queue_id" desc="队列编号，从1开始" min_val="1" type="INT32" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+<FuncCell name="addToMissDataQueue" simple_desc="移除点位并添加到丢失队列" desc="移除点位并添加到丢失队列" menu="传送带抓取">
+    <VarCellVec __prop_name__="_params">
+        <VarCell name="con_id" desc="传送带编号，从1开始" type="INT32" min_val="1" editable="true"/>
+        <VarCell name="queue_id" desc="队列编号，从1开始" type="INT32" min_val="1" editable="true"/>
+    </VarCellVec>
+</FuncCell>
+/------------------------plan 注册------------------------------/
+<PlanCell old_name="con_fast_catch" new_name="ConFastCatch" simple_desc="传送带快速抓取指令" desc="传送带快速抓取指令" menu="传送带抓取" interrupt="false" backward="false">
+    <ParamCellVec __prop_name__="_params">
+        <ParamCell old_name="obj_pe" new_name="obj_p" desc="物料位姿" type="RobotTarget" visiable="true"/>
+        <ParamCell old_name="end_pe" new_name="end_p" desc="放料点位姿" type="RobotTarget" visiable="true"/>
+        <ParamCell old_name="vel" new_name="v" desc="抓取速度" type="Speed" visiable="true"/>
+        <ParamCell old_name="con_id" new_name="cid" desc="传送带号" type="INT32" visiable="true"/>
+        <ParamCell old_name="con_pos" new_name="cp" desc="传送带拍照位置" type="DOUBLE" visiable="true"/>
+        <ParamCell old_name="catch_height" new_name="ch" desc="动态抓取下降高度(绝对位置)" type="DOUBLE" visiable="true"/>
+        <ParamCell old_name="sync_time" new_name="time" desc="同步运动时间" type="INT32" unit="ms" visiable="true"/>
+        <ParamCell old_name="do_index" new_name="do_index" desc="触发输出索引" type="INT32" visiable="true"/>
+        <ParamCell old_name="do_value" new_name="do_value" desc="触发输出数值" type="BOOL" visiable="true"/>
+    </ParamCellVec>
+</PlanCell>
+
+/------------------权限校验-------------------/
+<AuthorityRule cmd="conveyor_ctrl" pass="true" rule="User::Engineer &amp; RobotActivate::Enabled" name="移动传送带" desc="工程师；使能；"/>
+
+2023/08/11 xxt 把新控制柜的rtu从站读取合并到test分支
+old:
+在sememanager节点下新增ModbusRtuManager节点
+new:
+
+<ModbusRtuManager name="ModbusRtuManager">
+    <ModbusRtuSlavePool __prop_name__="_modbus_rtu_slave_">
+        <ModbusRtuSlave device_name="/dev/ttyUSB0" slave_id="1" baud="9600" data_bit="8" stop_bit="1" parity_bit="N" debugmode="true">
+            <InputRegisterPool __prop_name__="_input_register_pool">
+                <DIRegister name="DI1-DI36状态" addr="0x0100" length="3" counts="0" dval="0x0000"/>
+                <InputRegister name="DO1-DO16状态寄存器" addr="0x0103" length="1" counts="10"/>
+                <InputRegister name="DO17-DO32状态寄存器" addr="0x0104" length="1" counts="10"/>
+                <InputRegister name="DO33-DO36状态寄存器" addr="0x0105" length="1" counts="10"/>
+                <InputRegister name="DO1-DO16状态诊断寄存器" addr="0x0106" length="1" counts="10"/>
+                <InputRegister name="DO17-DO32状态诊断寄存器" addr="0x0107" length="1" counts="10"/>
+                <InputRegister name="DO33-DO36状态诊断寄存器" addr="0x0108" length="1" counts="10"/>
+                <InputRegister name="故障检测" addr="0x0109" length="1" counts="10"/>
+            </InputRegisterPool>
+            <HoldRegisterPool __prop_name__="_hold_register_pool">
+                <DORegister name="DO1-DO36状态" addr="0x0000" length="3" val="0" changeflag="0" counts="10" dval="0xffff"/>
+                <HoldRegister name="默认参数设置状态寄存器" addr="0x0003" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO1状态诊断失效次数" addr="0x0010" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO2状态诊断失效次数" addr="0x0011" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO3状态诊断失效次数" addr="0x0012" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO4状态诊断失效次数" addr="0x0013" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO5状态诊断失效次数" addr="0x0014" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO6状态诊断失效次数" addr="0x0015" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO7状态诊断失效次数" addr="0x0016" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO8状态诊断失效次数" addr="0x0017" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO9状态诊断失效次数" addr="0x0018" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO10状态诊断失效次数" addr="0x0019" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO11状态诊断失效次数" addr="0x001a" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO12状态诊断失效次数" addr="0x001b" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO13状态诊断失效次数" addr="0x001c" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO14状态诊断失效次数" addr="0x001d" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO15状态诊断失效次数" addr="0x001e" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO16状态诊断失效次数" addr="0x001f" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO17状态诊断失效次数" addr="0x0020" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO18状态诊断失效次数" addr="0x0021" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO19状态诊断失效次数" addr="0x0022" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO20状态诊断失效次数" addr="0x0023" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO21状态诊断失效次数" addr="0x0024" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO22状态诊断失效次数" addr="0x0025" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO23状态诊断失效次数" addr="0x0026" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO24状态诊断失效次数" addr="0x0027" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO25状态诊断失效次数" addr="0x0028" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO26状态诊断失效次数" addr="0x0029" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO27状态诊断失效次数" addr="0x002a" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO28状态诊断失效次数" addr="0x002b" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO29状态诊断失效次数" addr="0x002c" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO30状态诊断失效次数" addr="0x002d" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO31状态诊断失效次数" addr="0x002e" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO32状态诊断失效次数" addr="0x002f" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO33状态诊断失效次数" addr="0x0030" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO34状态诊断失效次数" addr="0x0031" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO35状态诊断失效次数" addr="0x0032" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="DO36状态诊断失效次数" addr="0x0033" length="1" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="波特率" addr="0x0067" length="0" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="数据位" addr="0x0068" length="0" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="校验位" addr="0x0069" length="0" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="停止位" addr="0x006a" length="0" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="超时检查" addr="0x006b" length="0" val="0" changeflag="0" counts="10"/>
+                <HoldRegister name="从站号" addr="0x006c" length="0" val="0" changeflag="0" counts="10"/>
+            </HoldRegisterPool>
+        </ModbusRtuSlave>
+    </ModbusRtuSlavePool>
+</ModbusRtuManager>
+
+2023/8/15 xxt 所有xml均修改
+old:
+                    <DistributeRule module="Log" cmds="log"/>
+new：
+                    <DistributeRule module="Log" cmds="log;log_solve"/>
+
+
+
+2023/8/16 yw 修复bug748对xml的修改 rs指令增加对使能的现在
+<AuthorityRule cmd="rs" pass="false" rule="PgmState::Running | RobotMotion::Running | (!RobotOpMode::Manual) | (!User::None) | RobotActivate::Disabled" name="返回零点" desc="工程师；手动；未使能；正常；"/>
+
+
+
+2023/8/16 xxt 所有xml均修改
+old:
+                    <DistributeRule module="kaanh::robot::ConfigModule" cmds="record_motors_datas;read_motor;write_motor"/>
+new：
+                    <DistributeRule module="kaanh::robot::ConfigModule" cmds="record_motors_datas;read_motor;write_motor;calculate_stop;calculate_start"/>        
+
+
+
+2023/8/17 yw 修改调速策略
+<kaanh.motion.Motion name="kaanh::motion::Motion">
+    <kaanh.AccDecJerkLimit __prop_name__="acc_dec_jerk_limit" joint_jerk="10" cart_line_acc="2.5" cart_line_jerk="10" cart_angle_acc="2.5" cart_angle_jerk="10"/>
+    <kaanh.SpeedLimit __prop_name__="speed_limit" v_tcp_max="6" v_tcp_min="0" w_tcp_max="12.56637061435917246" w_tcp_min="0" max_manual_line_speed="0.20000000000000001" max_manual_angle_speed_per="30"/>
+    <kaanh.ZoneLimit __prop_name__="zone_limit" dis_max="0.10000000000000001" dis_min="0" per_max="0.5" per_min="0"/>
+    <kaanh.ToolsWobjs __prop_name__="tools_wobjs" tool_num="17" wobj_num="33" ex_tool_num="16" hd_wobj_num="32" ex_axis_tool_num="0"/>
+</kaanh.motion.Motion>
+
+
+2023/8/21 xxt 所有xml均修改
+old:
+            <Driver name="Driver">
+                <DriverPool __prop_name__="driver_pool">
+                    <EthercatDriver sto1_code="0" sto2_code="0" motor_id="1" driver_break_pdo="0" offset="0"/>
+                    <EthercatDriver sto1_code="0" sto2_code="0" motor_id="2" driver_break_pdo="0" offset="0"/>
+                    <EthercatDriver sto1_code="0" sto2_code="0" motor_id="3" driver_break_pdo="0" offset="0"/>
+                    <EthercatDriver sto1_code="0" sto2_code="0" motor_id="4" driver_break_pdo="0" offset="0"/>
+                    <EthercatDriver sto1_code="0" sto2_code="0" motor_id="5" driver_break_pdo="0" offset="0"/>
+                    <EthercatDriver sto1_code="0" sto2_code="0" motor_id="6" driver_break_pdo="0" offset="0"/>
+                </DriverPool>
+            </Driver>
+new:
+            <DriverCsvParse name="DriverCsvParse"/>
+            <Driver name="Driver"/>
+
+
+
+2023/8/16 xxt 所有xml均修改
+old:
+                    
+new：
+                    <DistributeRule module="ModbusRtuManager" cmds="rtuset;rtuget"/>
+                    <MrtuLed name="MrtuLed" device_name="" slave_id="1" baud="9600" data_bit="8" stop_bit="1" parity_bit="N" Debugmode="false"/>
+			
+
+2023/8/25 yw 新曾xml kaanh_puma_conveyor
+
+2023/08/29 yw 调整文件，删除新增
+/----------------------删除节点：---------------------------/
+<kaanh.module.Motion name="kaanh::module::Motion"/>
+
+
+/----------------------删除节点：---------------------------/
+<kaanh.motion.Motion name="kaanh::motion::Motion">
+    <kaanh.AccDecJerkLimit __prop_name__="acc_dec_jerk_limit" joint_acc="90" joint_dec="90" joint_jerk="10" cart_acc="2.5" cart_dec="2.5" cart_jerk="10"/>
+    <kaanh.SpeedLimit __prop_name__="speed_limit" w_per_max="1" w_per_min="0" v_tcp_max="2" v_tcp_min="0" w_tcp_max="6.28318530717958623" w_tcp_min="0" v_ext_max="6" v_ext_min="0" w_ext_max="6.28318530717958623" w_ext_min="0" manual_speed_per="10"/>
+    <kaanh.ZoneLimit __prop_name__="zone_limit" dis_max="0.10000000000000001" dis_min="0" per_max="0.5" per_min="0"/>
+    <kaanh.ToolsWobjs __prop_name__="tools_wobjs" tool_num="17" wobj_num="33" ex_tool_num="0" hd_wobj_num="0" ex_axis_tool_num="0"/>
+</kaanh.motion.Motion>
+
+/----------------------删除节点：---------------------------/
+<kaanh.multi_motion.Motion name="kaanh::multi_motion::Motion"/>
+
+
+/----------------------修改节点：---------------------------/
+ 原先节点修改为如下节点
+<kaanh.multi_motion.MultiModelControl name="kaanh::multi_motion::MultiModelControl">
+    <kaanh.AccDecJerkLimit __prop_name__="acc_dec_jerk_limit" joint_jerk="10" cart_line_acc="2.5" cart_line_jerk="10" cart_angle_acc="2.5" cart_angle_jerk="10"/>
+    <kaanh.SpeedLimit __prop_name__="speed_limit" v_tcp_max="6" v_tcp_min="0" w_tcp_max="12.56637061435917246" w_tcp_min="0" max_manual_line_speed="0.20000000000000001" max_manual_angle_speed_per="30"/>
+    <kaanh.ZoneLimit __prop_name__="zone_limit" dis_max="0.10000000000000001" dis_min="0" per_max="0.5" per_min="0"/>
+    <kaanh.ToolsWobjs __prop_name__="tools_wobjs" tool_num="17" wobj_num="33" ex_tool_num="16" hd_wobj_num="32" ex_axis_tool_num="0"/>
+</kaanh.multi_motion.MultiModelControl>
+/----------------------修改节点：---------------------------/
+<DistributeRule module="kaanh::motion::Motion" cmds="set_adj_limit;get_speed_limit;set_speed_limit;get_adj_limit"/>
+修改为
+<DistributeRule module="kaanh::multi_motion::MultiModelControl" cmds="set_adj_limit;get_speed_limit;set_speed_limit;get_adj_limit"/>
+
+/-----------------权限节点中新增节点----------------------------/
+<AuthorityRule cmd="zerocalib_set" pass="true" rule="User::Manufacturer &amp; RobotActivate::Disabled &amp; PgmState::Unloaded &amp; RobotOpMode::Manual" name="修改dh参数为标定结果" desc="厂家；手动；未使能；程序未加载；"/>
+<AuthorityRule cmd="zerocalib_ret" pass="true" rule="User::Manufacturer &amp; RobotActivate::Disabled &amp; PgmState::Unloaded &amp; RobotOpMode::Manual" name="回退dh参数为备份数据" desc="厂家；手动；未使能；程序未加载；"/>
+/-----------------权限节点中新增节点----------------------------/ 
+
+/-----------------分发器节点中新增节点----------------------------/
+<DistributeRule module="ZeroCalib" cmds="zerocalib_bp;zerocalib_clb;zerocalib_set;zerocalib_ret"/>
+/-----------------分发器节点中新增节点----------------------------/ 
+
+
+/-----------------modulePoolObject节点中新增节点----------------------------/ 
+<ZeroCalib name="ZeroCalib"/>
+/-----------------modulePoolObject节点中新增节点----------------------------/ 
+
+22230901 yw fix Current and jog
+<kaanh.package.Current name="kaanh::package::Current" cur_is_calibrated="true" collision_detection_switch="false" collision_detection_sensitivity="{10,10,10,10,10,10}" max_static_vel="{5,5,5,5,5,5}" fr_static_index="{0.5,0.5,0.5,0.5,0.5,0.5}" fr_dynamic_index="{0.1,0.1,0.1,0.1,0.1,0.1}"/>
+<kaanh.multi_motion.Jog name="kaanh::multi_motion::Jog" jogj_vel="{0.1,0.1,0.1,0.1,0.1,0.1}" jogj_acc="{0.2,0.2,0.2,0.2,0.2,0.2}" jogj_dec="{0.2,0.2,0.2,0.2,0.2,0.2}" jogc_vel="{200,200,200,30,30,30}" jogc_acc="{1000,1000,1000,150,150,150}" jogc_dec="{1000,1000,1000,150,150,150}"/>
+
+
+/-----------------分发器节点中更新节点----------------------------/
+old:
+<DistributeRule module="Driver" cmds="get_sdo_val;driver_err_clean;set_sdo_val;driver_err_quiry;driver_break;encoder_clean"/>
+new：
+<DistributeRule module="Driver" cmds="get_sdo_val;driver_err_clean;set_sdo_val;driver_err_quiry;driver_break;encoder_clean;set_virtual"/>
+/-----------------分发器节点中更新节点----------------------------/
+
+
+/-----------------shell节点中添加节点----------------------------/
+add:
+			<Web3DModel name="Web3DModel" />
+/-----------------shell节点中添加节点----------------------------/
+
+/-----------------DistributeRule节点中添加节点----------------------------/
+add:
+<DistributeRule module="Web3DModel" cmds="get_3dmodel;set_3dpos;set_3dname" />
+/-----------------DistributeRule节点中添加节点----------------------------/             
