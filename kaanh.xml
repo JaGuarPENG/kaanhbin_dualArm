@@ -5,7 +5,7 @@
                 <Environment __prop_name__="environment" gravity="{0,0,-9.8,0,0,0}"/>
                 <VariablePoolElement __prop_name__="variable_pool">
                     <MatrixVariable name="tool0_axis_home">{0,0,0,0,0,0}</MatrixVariable>
-                    <MatrixVariable name="dh">{0.1388,0.595726,0.574191,0.105278,0.124673,0.10077}</MatrixVariable>
+                    <MatrixVariable name="dh">{0.1388,0.595726,0.574191,0.105278,0.124673,0.24377}</MatrixVariable>
                     <StringVariable name="machine_name">Kaanh-Ur</StringVariable>
                 </VariablePoolElement>
                 <PartPoolElement __prop_name__="part_pool">
@@ -83,9 +83,9 @@
                         </MarkerPoolElement>
                         <GeometryPoolElement __prop_name__="geometry_pool"/>
                     </Part>
-                    <Part name="L6" active="true" pe="{0,0.225443,1.413995,3.14159265358979,1.5707963267949,1.5707963267949}" vel="{0,0,0,0,0,0}" acc="{0,0,0,0,0,0}" inertia="{1,0,0,0,0,0,0,0,0,0}">
+                    <Part name="L6" active="true" pe="{7.71487156074539e-16,0.363443,1.413995,3.14159265358979,1.5707963267949,1.57079632679489}" vel="{0,0,0,0,0,0}" acc="{0,0,0,0,0,0}" inertia="{1,0,0,0,0,0,0,0,0,0}">
                         <MarkerPoolElement __prop_name__="marker_pool">
-                            <Marker name="joint_5_i" active="true" pe="{2.22044604925031e-16,0,-0.10077,4.71238898038469,0,4.71238898038469}"/>
+                            <Marker name="joint_5_i" active="true" pe="{2.22044604925031e-16,0,-0.23877,4.71238898038469,0,4.71238898038469}"/>
                             <Marker name="tool0" active="true" pe="{0,0,0,-0,0,-0}"/>
                             <Marker name="tool1" active="true" pe="{0,0,0,-0,0,-0}"/>
                             <Marker name="tool2" active="true" pe="{0,0,0,-0,0,-0}"/>
@@ -124,7 +124,7 @@
                     <RevoluteJoint name="joint_5" active="true" prt_m="L6" prt_n="L5" mak_i="joint_5_i" mak_j="joint_5_j" cf="{0,0,0,0,0}"/>
                 </JointPoolElement>
                 <GeneralMotionPoolElement __prop_name__="general_motion_pool">
-                    <GeneralMotion name="ee" active="false" prt_m="L6" prt_n="ground" mak_i="tool0" mak_j="wobj0" cf="{0,0,0,0,0,0}" mp="{0,0.225443,1.413995,0.785398163397447,-1.57079632679489,3.92699081698724}" mv="{0,0,0,0,0,0}" ma="{0,0,0,0,0,0}" pose_type="EULER321" vel_type="VEL" acc_type="ACC"/>
+                    <GeneralMotion name="ee" active="false" prt_m="L6" prt_n="ground" mak_i="tool0" mak_j="wobj0" cf="{0,0,0,0,0,0}" mp="{7.71487156074539e-16,0.363443,1.413995,2.35619449019234,-1.57079632679489,2.35619449019234}" mv="{0,0,0,0,0,0}" ma="{0,0,0,0,0,0}" pose_type="EULER321" vel_type="VEL" acc_type="ACC"/>
                 </GeneralMotionPoolElement>
                 <ForcePoolElement __prop_name__="force_pool"/>
                 <SolverPoolElement __prop_name__="solver_pool">
@@ -219,7 +219,7 @@
                     </Part>
                     <Part name="L6" active="true" pe="{0,0.225443,1.413995,3.14159265358979,1.5707963267949,1.5707963267949}" vel="{0,0,0,0,0,0}" acc="{0,0,0,0,0,0}" inertia="{1,0,0,0,0,0,0,0,0,0}">
                         <MarkerPoolElement __prop_name__="marker_pool">
-                            <Marker name="joint_5_i" active="true" pe="{2.22044604925031e-16,0,-0.10077,4.71238898038469,0,4.71238898038469}"/>
+                            <Marker name="joint_5_i" active="true" pe="{2.22044604925031e-16,0.0825,-0.20977,4.71238898038469,0,4.71238898038469}"/>
                             <Marker name="tool0" active="true" pe="{0,0,0,-0,0,-0}"/>
                             <Marker name="tool1" active="true" pe="{0,0,0,-0,0,-0}"/>
                             <Marker name="tool2" active="true" pe="{0,0,0,-0,0,-0}"/>
@@ -1954,25 +1954,16 @@
                     </GroupParam>
                 </Command>
             </ModelSetPos>
-            <ModelMoveX name="plan">
-                <Command __prop_name__="command" name="m_x">
-                    <GroupParam name="group_param">
-                        <Param name="model" abbreviation="m" default="0"/>
-                        <Param name="distance" abbreviation="d" default="10.0"/>
-                        <Param name="orientation" abbreviation="o" default="1.0"/>
-                    </GroupParam>
-                </Command>
-            </ModelMoveX>
             <ModelComP name="plan">
                 <Command __prop_name__="command" name="m_comp"/>
             </ModelComP>
-            <ModelComP2 name="plan">
-                <Command __prop_name__="command" name="m_c2">
+            <ModelTest name="plan">
+                <Command __prop_name__="command" name="m_t">
                     <GroupParam name="group_param">
                         <Param name="model" abbreviation="m" default="0"/>
                     </GroupParam>
                 </Command>
-            </ModelComP2>
+            </ModelTest>
             <ForceAlign name="plan">
                 <Command __prop_name__="command" name="m_fa">
                     <GroupParam name="group_param">
@@ -1994,6 +1985,27 @@
                     </GroupParam>
                 </Command>
             </ForceDrag>
+            <PegInHole name="plan">
+                <Command __prop_name__="command" name="m_ph"/>
+            </PegInHole>
+            <HoleInPeg name="plan">
+                <Command __prop_name__="command" name="m_hp">
+                    <GroupParam name="group_param">
+                        <Param name="degree" abbreviation="d" default="0"/>
+						<Param name="point" abbreviation="p" default="0"/>
+                    </GroupParam>
+                </Command>
+            </HoleInPeg>
+            <PegOutHole name="plan">
+                <Command __prop_name__="command" name="m_po">
+                    <GroupParam name="group_param">
+                        <Param name="model" abbreviation="m" default="0"/>
+                    </GroupParam>
+                </Command>
+            </PegOutHole>
+             <Arm2Init name="plan">
+                <Command __prop_name__="command" name="2_back"/>
+            </Arm2Init>
         </PlanPoolObject>
     </PlanRoot>
     <InterfacePoolObject __prop_name__="interface">
@@ -2139,37 +2151,37 @@
             </Authority>
             <Distributor name="Distributor">
                 <DistributeRuleVec __prop_name__="_distribute_rules">
-                    <DistributeRule module="SemaManager" cmds="semactrl;semaquery"/>
                     <DistributeRule module="ZeroCalib" cmds="ZeroCalib"/>
-                    <DistributeRule module="TimeCounter" cmds="time"/>
-                    <DistributeRule module="Log" cmds="log_solve;log"/>
                     <DistributeRule module="About" cmds="about"/>
-                    <DistributeRule module="ModbusRtuManager" cmds="rtuset;rtuget"/>
-                    <DistributeRule module="Driver" cmds="set_sdo_val;get_sdo_val;set_virtual;driver_break;driver_err_clean;encoder_clean;driver_err_quiry"/>
-                    <DistributeRule module="kaanh::robot::ConfigModule" cmds="record_motors_datas;read_motor;write_motor;calculate_start;calculate_stop"/>
-                    <DistributeRule module="ExternalAuto" cmds="program_quiry;external_singal_from_bind;servo_confirm;get_start_load_program;program_unbind_all;set_start_load_program;program_bind;external_singal_from;program_bind_quiry;program_unbind;external_pgmvel_singal_from_bind"/>
-                    <DistributeRule module="ModbusTcpServer" cmds="mtcp_slave_ctrl;mtcp_slave_query;mtcp_slave_edit"/>
-                    <DistributeRule module="kaanh::package::Current" cmds="read_fr_dynamic_index;read_fr_static_index;read_max_static_vel;read_torque;write_max_static_vel;write_fr_static_index;collision_detection_ctrl;write_torque;write_fr_dynamic_index;read_collision_detection_state;write_collision_detection_sensitivity;write_collision_detection_state;read_collision_detection_sensitivity"/>
-                    <DistributeRule module="FunctionGather" cmds="get_xml_io;controller_reboot;delete_io;network_restart;set_start_default_speed;modify_network;add_io;xml_slave;slave_attr;get_io_names;create_network;network_quiry;get_sample_period_ms"/>
-                    <DistributeRule module="UserManagement" cmds="user;pwdquery;login;pwd;logout"/>
-                    <DistributeRule module="IoManager" cmds="ioquery;ioctrl"/>
-                    <DistributeRule module="Web3DModel" cmds="set_3dname;set_3dpos;get_3dmodel"/>
-                    <DistributeRule module="PgmController" cmds="pgmadmin_rename_program;pgmadmin_create_project;pgmctrl;pgmadmin_rename_project;pgmadmin_create_program;pgmadmin_delete_program;pgmedit_update_var_in_mem;pgmadmin_delete_project;pgmedit_save;pgmedit_add_var;pgmedit_insert_stmts;pgmedit_update_var;pgmquery;pgmedit_comment_stmts;pgmedit_rename_var;pgmedit_uncomment_stmts;pgmedit_delete_var;pgmedit_remove_stmts;pgmedit_update_stmt"/>
-                    <DistributeRule module="Pallet3" cmds="PkgPallet"/>
-                    <DistributeRule module="kaanh::multi_motion::MultiModelControl" cmds="get_coupling_info;set_adj_limit;set_speed_limit;set_coupling_info;get_adj_limit;get_speed_limit"/>
+                    <DistributeRule module="TimeCounter" cmds="time"/>
                     <DistributeRule module="RobotConfig" cmds="write_dh;read_dh"/>
-                    <DistributeRule module="SystemSema" cmds="shield;en;unshield;ds;manual_en;pos_sema_param;manual_ds;virtual_en;force_sema_param;virtual_ds"/>
-                    <DistributeRule module="kaanh::package::Force" cmds="get_force_sensor_load_id;get_fs_limit;set_fsg_par;set_axis_assemble_par;delete_force_trace_file;set_filter_param;get_axis_assemble_par;get_force_protection;set_force_guidance_admit_par;get_fs_switch;set_assemble_par;get_force_trace_files;get_fsl_par;get_filter_param;set_fs_limit;set_force_holding_detect_time;set_fs_protection_switch;get_fs_move_par;get_fsg_par;set_force_sensor_ee_id;stop_fsg;set_force_sensor_load_id;get_assemble_par;get_fs_protection_switch;get_force_holding_detect_time;start_fsg;get_force_guidance_admit_par;get_force_sensor_ee_id;set_fs_move_par;set_fsg_is_open;set_fs_calibrate;set_force_protection;set_fs_switch"/>
-                    <DistributeRule module="Trajfc" cmds="trajfc"/>
-                    <DistributeRule module="kaanh::multi_motion::JogControl" cmds="write_jogj_acc;read_jogj_dec;write_jogc_acc;write_jogc_vel;write_jogj_dec;read_jogc_dec;read_jogc_acc;read_jogj_acc;write_jogj_vel;write_jogc_dec;read_jogc_vel;read_jogj_vel"/>
-                    <DistributeRule module="FileOperator" cmds="fop_create_file;fop_rename_dir;fop_open_dir;fop_cut;fop_remove_file;fop_create_dir;fop_open_file;fop_rename_file;fop_copy;fop_modify_file;fop_remove_dir"/>
-                    <DistributeRule module="SplcController" cmds="splcctrl;splcquery"/>
-                    <DistributeRule module="PkgManager" cmds="pkg"/>
-                    <DistributeRule module="kaanh::package::ConveyorManager" cmds="get_tolerance;set_tolerance;camera_calib;set_conveyor_vel;conveyor_calib;get_conveyor_vel;conveyor_edit;cal_circle;clear_count;conveyor_ctrl;conveyor_query"/>
-                    <DistributeRule module="Pallet" cmds="pallet"/>
+                    <DistributeRule module="ModbusTcpServer" cmds="mtcp_slave_ctrl;mtcp_slave_query;mtcp_slave_edit"/>
+                    <DistributeRule module="FunctionGather" cmds="network_restart;add_io;set_start_default_speed;create_network;modify_network;delete_io;get_sample_period_ms;get_xml_io;controller_reboot;xml_slave;get_io_names;slave_attr;network_quiry"/>
                     <DistributeRule module="Get" cmds="get"/>
-                    <DistributeRule module="System" cmds="rpath_query;pkg_query;copy_files;prj_query;systime;language;getfile;reboot;controller;rename_files;lpath_query;udisk;get_shortcut_path"/>
-                    <DistributeRule module="AreaManager" cmds="areactrl;areaedit;areaquery"/>
+                    <DistributeRule module="System" cmds="lpath_query;controller;prj_query;getfile;rpath_query;copy_files;systime;language;reboot;udisk;get_shortcut_path;rename_files;pkg_query"/>
+                    <DistributeRule module="Pallet" cmds="pallet"/>
+                    <DistributeRule module="Log" cmds="log_solve;log"/>
+                    <DistributeRule module="kaanh::package::Current" cmds="collision_detection_ctrl;write_fr_static_index;write_torque;write_max_static_vel;write_collision_detection_state;write_collision_detection_sensitivity;read_fr_static_index;read_max_static_vel;write_fr_dynamic_index;read_collision_detection_state;read_torque;read_fr_dynamic_index;read_collision_detection_sensitivity"/>
+                    <DistributeRule module="ModbusRtuManager" cmds="rtuset;rtuget"/>
+                    <DistributeRule module="kaanh::multi_motion::JogControl" cmds="write_jogj_dec;write_jogj_vel;read_jogc_dec;read_jogc_acc;write_jogc_vel;write_jogj_acc;read_jogj_acc;write_jogc_acc;read_jogc_vel;read_jogj_vel;read_jogj_dec;write_jogc_dec"/>
+                    <DistributeRule module="Trajfc" cmds="trajfc"/>
+                    <DistributeRule module="UserManagement" cmds="pwdquery;login;logout;pwd;user"/>
+                    <DistributeRule module="IoManager" cmds="ioquery;ioctrl"/>
+                    <DistributeRule module="kaanh::multi_motion::MultiModelControl" cmds="get_coupling_info;get_speed_limit;set_coupling_info;set_adj_limit;get_adj_limit;set_speed_limit"/>
+                    <DistributeRule module="PkgManager" cmds="pkg"/>
+                    <DistributeRule module="kaanh::package::ConveyorManager" cmds="conveyor_ctrl;set_conveyor_vel;get_tolerance;conveyor_edit;get_conveyor_vel;set_tolerance;conveyor_calib;camera_calib;clear_count;conveyor_query;cal_circle"/>
+                    <DistributeRule module="Driver" cmds="set_sdo_val;get_sdo_val;set_virtual;driver_err_clean;encoder_clean;driver_break;driver_err_quiry"/>
+                    <DistributeRule module="ExternalAuto" cmds="program_unbind_all;set_start_load_program;program_bind_quiry;external_singal_from;get_start_load_program;program_quiry;program_bind;servo_confirm;external_singal_from_bind;program_unbind;external_pgmvel_singal_from_bind"/>
+                    <DistributeRule module="kaanh::robot::ConfigModule" cmds="write_motor;read_motor;calculate_stop;record_motors_datas;calculate_start"/>
+                    <DistributeRule module="FileOperator" cmds="fop_create_dir;fop_remove_file;fop_open_dir;fop_modify_file;fop_cut;fop_remove_dir;fop_rename_file;fop_open_file;fop_copy;fop_create_file;fop_rename_dir"/>
+                    <DistributeRule module="SplcController" cmds="splcquery;splcctrl"/>
+                    <DistributeRule module="AreaManager" cmds="areaedit;areactrl;areaquery"/>
+                    <DistributeRule module="SemaManager" cmds="semaquery;semactrl"/>
+                    <DistributeRule module="SystemSema" cmds="shield;manual_ds;unshield;ds;virtual_ds;manual_en;pos_sema_param;en;virtual_en;force_sema_param"/>
+                    <DistributeRule module="kaanh::package::Force" cmds="set_fs_protection_switch;set_force_holding_detect_time;set_fsg_is_open;set_fs_move_par;get_filter_param;get_force_trace_files;set_fs_switch;get_axis_assemble_par;get_force_holding_detect_time;start_fsg;get_assemble_par;get_fsg_par;get_fs_move_par;get_force_sensor_ee_id;get_force_guidance_admit_par;get_fs_limit;get_fsl_par;get_fs_protection_switch;set_force_sensor_load_id;get_fs_switch;set_force_guidance_admit_par;stop_fsg;set_fs_calibrate;set_fs_limit;set_force_protection;set_fsg_par;set_axis_assemble_par;delete_force_trace_file;set_filter_param;set_assemble_par;set_force_sensor_ee_id;get_force_protection;get_force_sensor_load_id"/>
+                    <DistributeRule module="Pallet3" cmds="PkgPallet"/>
+                    <DistributeRule module="PgmController" cmds="pgmedit_insert_stmts;pgmedit_rename_var;pgmedit_add_var;pgmadmin_create_program;pgmquery;pgmedit_update_stmt;pgmedit_remove_stmts;pgmadmin_delete_program;pgmedit_update_var;pgmadmin_rename_program;pgmadmin_delete_project;pgmadmin_create_project;pgmadmin_rename_project;pgmctrl;pgmedit_save;pgmedit_update_var_in_mem;pgmedit_delete_var;pgmedit_uncomment_stmts;pgmedit_comment_stmts"/>
+                    <DistributeRule module="Web3DModel" cmds="set_3dname;set_3dpos;get_3dmodel"/>
                 </DistributeRuleVec>
             </Distributor>
             <FileOperator name="FileOperator"/>

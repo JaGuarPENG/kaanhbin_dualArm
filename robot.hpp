@@ -25,6 +25,25 @@ namespace robot
 
 	};
 
+
+    class Arm2Init : public aris::core::CloneObject<Arm2Init, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+        virtual ~Arm2Init();
+        explicit Arm2Init(const std::string& name = "Arm2Init");
+        KAANH_DECLARE_BIG_FOUR(Arm2Init)
+
+    private:
+        struct Imp;
+        aris::core::ImpPtr<Imp> imp_;
+
+    };
+
+
+
+
 	class ModelForward :public aris::core::CloneObject<ModelForward, aris::plan::Plan>
 	{
 	public:
@@ -57,19 +76,18 @@ namespace robot
 
 	};
 
-	class ModelMoveX :public aris::core::CloneObject<ModelMoveX, aris::plan::Plan>
+    class ModelTest :public aris::core::CloneObject<ModelTest, aris::plan::Plan>
 	{
 	public:
 		auto virtual prepareNrt()->void;
 		auto virtual executeRT()->int;
 
-		virtual ~ModelMoveX();
-		explicit ModelMoveX(const std::string& name = "ModelMoveX");
-		KAANH_DECLARE_BIG_FOUR(ModelMoveX)
+        virtual ~ModelTest();
+        explicit ModelTest(const std::string& name = "ModelTest");
+        KAANH_DECLARE_BIG_FOUR(ModelTest)
 	private:
-		int m_;
-		double d_;
-		double o_;
+        struct Imp;
+        aris::core::ImpPtr<Imp> imp_;
 	};
 
 
@@ -155,21 +173,56 @@ namespace robot
 
 	};
 
-    class ModelComP2 :public aris::core::CloneObject<ModelComP2, aris::plan::Plan>
+
+	class PegInHole :public aris::core::CloneObject<PegInHole, aris::plan::Plan>
+	{
+	public:
+		auto virtual prepareNrt()->void;
+		auto virtual executeRT()->int;
+
+		virtual ~PegInHole();
+		explicit PegInHole(const std::string& name = "PegInHole");
+        KAANH_DECLARE_BIG_FOUR(PegInHole)
+
+	private:
+		struct Imp;
+		aris::core::ImpPtr<Imp> imp_;
+
+		
+	};
+
+    class HoleInPeg :public aris::core::CloneObject<HoleInPeg, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
         auto virtual executeRT()->int;
 
-        virtual ~ModelComP2();
-        explicit ModelComP2(const std::string& name = "ModelComP2");
-        KAANH_DECLARE_BIG_FOUR(ModelComP2)
+        virtual ~HoleInPeg();
+        explicit HoleInPeg(const std::string& name = "HoleInPeg");
+        KAANH_DECLARE_BIG_FOUR(HoleInPeg)
 
     private:
         struct Imp;
         aris::core::ImpPtr<Imp> imp_;
 
+
     };
+
+	class PegOutHole :public aris::core::CloneObject<PegOutHole, aris::plan::Plan>
+	{
+	public:
+		auto virtual prepareNrt()->void;
+		auto virtual executeRT()->int;
+
+		virtual ~PegOutHole();
+		explicit PegOutHole(const std::string& name = "PegOutHole");
+		KAANH_DECLARE_BIG_FOUR(PegOutHole)
+	private:
+		struct Imp;
+		aris::core::ImpPtr<Imp> imp_;
+
+	};
+
 
 }
 
