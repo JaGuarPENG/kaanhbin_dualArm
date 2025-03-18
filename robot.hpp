@@ -269,11 +269,14 @@ namespace robot
         KAANH_DECLARE_BIG_FOUR(Search)
 
 
-    private:
-        struct Imp;
-        aris::core::ImpPtr<Imp> imp_;
+		virtual ~PegOutHole();
+		explicit PegOutHole(const std::string& name = "PegOutHole");
+		KAANH_DECLARE_BIG_FOUR(PegOutHole)
+	private:
+		struct Imp;
+		aris::core::ImpPtr<Imp> imp_;
 
-    };
+	};
 
 
 
