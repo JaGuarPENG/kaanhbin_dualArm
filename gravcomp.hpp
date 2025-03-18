@@ -19,4 +19,7 @@ public:
     auto savePLVector(const double P1_[6], const double L1_[6], const double P2_[6], const double L2_[6]) -> void;
     auto loadPLVector(double P1_[6], double L1_[6], double P2_[6], double L2_[6]) -> void;
 
+    auto saveInitForce(const double arm1_init_force_[6], const double arm2_init_force_[6]) -> void;
+    auto loadInitForce(double arm1_init_force_[6], double arm2_init_force_[6]) -> void;
+
 };

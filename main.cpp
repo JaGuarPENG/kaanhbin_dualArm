@@ -15,6 +15,7 @@
 #include "plan.hpp"
 
 #include "robot.hpp"
+#include "assemcomd.hpp"
 
 
 #define __S(x) #x
