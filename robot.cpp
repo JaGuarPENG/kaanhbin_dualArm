@@ -385,248 +385,6 @@ namespace robot
     KAANH_DEFINE_BIG_FOUR_CPP(ModelInit)
 
 
-    struct Arm2Init::Imp {
-
-        //Flag
-        bool init = false;
-
-        //Arm1
-        double arm1_init_force[6]{ 0 };
-        double arm1_p_vector[6]{ 0 };
-        double arm1_l_vector[6]{ 0 };
-
-        //Arm2
-        double arm2_init_force[6]{ 0 };
-        double arm2_p_vector[6]{ 0 };
-        double arm2_l_vector[6]{ 0 };
-
-    };
-    auto Arm2Init::prepareNrt()->void {
-
-        for (auto& m : motorOptions()) m =
-            aris::plan::Plan::NOT_CHECK_POS_CONTINUOUS_SECOND_ORDER;
-
-
-    }
-    auto Arm2Init::executeRT()->int {
-
-        //dual transform modelbase into multimodel
-        auto& dualArm = dynamic_cast<aris::dynamic::MultiModel&>(modelBase()[0]);
-        //at(0) -> Arm1 -> white
-        auto& arm1 = dualArm.subModels().at(0);
-        //at(1) -> Arm2 -> blue
-        auto& arm2 = dualArm.subModels().at(1);
-
-        //transform to model
-        auto& model_a1 = dynamic_cast<aris::dynamic::Model&>(arm1);
-        auto& model_a2 = dynamic_cast<aris::dynamic::Model&>(arm2);
-
-        //End Effector
-        auto& eeA1 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a1.generalMotionPool().at(0));
-        auto& eeA2 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a2.generalMotionPool().at(0));
-
-
-        GravComp gc;
-
-        static double d_pos = 0.00001;
-        static double tolerance = 0.00005;
-
-        double current_angle[12]{ 0 };
-        double current_sa_angle[6]{ 0 };
-
-        double comp_force[6]{ 0 };
-        double current_pm[16]{ 0 };
-        double current_pos[6]{ 0 };
-        double actual_force[6]{ 0 };
-        double transform_force[6]{ 0 };
-
-
-
-        auto getForceData = [&](double* data_, int m_, bool init_)
-        {
-
-            int raw_force[6]{ 0 };
-
-            for (std::size_t i = 0; i < 6; ++i)
-            {
-                if (ecMaster()->slavePool()[8 + 7 * m_].readPdo(0x6020, 0x01 + i, raw_force + i, 32))
-                    mout() << "error" << std::endl;
-
-                data_[i] = (static_cast<double>(raw_force[i]) / 1000.0);
-
-            }
-
-            if (!init_)
-            {
-                mout() << "Compensate Init Force" << std::endl;
-            }
-            else
-            {
-                if (m_ == 0)
-                {
-                    for (std::size_t i = 0; i < 6; ++i)
-                    {
-
-                        data_[i] = (static_cast<double>(raw_force[i]) / 1000.0) - imp_->arm1_init_force[i];
-
-                    }
-                }
-                else if (m_ == 1)
-                {
-                    for (std::size_t i = 0; i < 6; ++i)
-                    {
-
-                        data_[i] = (static_cast<double>(raw_force[i]) / 1000.0) - imp_->arm2_init_force[i];
-
-                    }
-                }
-                else
-                {
-                    mout() << "Wrong Model" << std::endl;
-                }
-
-            }
-
-        };
-
-        auto saMove = [&](double* pos_, aris::dynamic::Model& model_, int type_) {
-
-            model_.setOutputPos(pos_);
-
-            if (model_.inverseKinematics())
-            {
-                throw std::runtime_error("Inverse Kinematics Position Failed!");
-            }
-
-
-            double x_joint[6]{ 0 };
-
-            model_.getInputPos(x_joint);
-
-            if (type_ == 0)
-            {
-                for (std::size_t i = 0; i < 6; ++i)
-                {
-                    controller()->motorPool()[i].setTargetPos(x_joint[i]);
-                }
-            }
-            else if (type_ == 1)
-            {
-                for (std::size_t i = 0; i < 6; ++i)
-                {
-                    controller()->motorPool()[i + 6].setTargetPos(x_joint[i]);
-                }
-            }
-            else
-            {
-                throw std::runtime_error("Arm Type Error");
-            }
-        };
-
-        auto motorsPositionCheck = [](const double* current_sa_angle_, const double* target_pos_, size_t dim_)
-        {
-            for (int i = 0; i < dim_; i++)
-            {
-                if (std::fabs(current_sa_angle_[i] - target_pos_[i]) >= tolerance)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        };
-
-        //single arm move 1-->white 2-->blue
-        auto saJointMove = [&](double target_mp_[6], int m_)
-        {
-            double current_angle[12] = { 0 };
-            double move = 0.00005;
-
-            for (int i = 0; i < 12; i++)
-            {
-                current_angle[i] = controller()->motorPool()[i].targetPos();
-            }
-
-            for (int i = 0; i < 6; i++)
-            {
-                if (current_angle[i+6*m_] <= target_mp_[i] - move)
-                {
-                    controller()->motorPool()[i+6*m_].setTargetPos(current_angle[i+6*m_] + move);
-                }
-                else if (current_angle[i+6*m_] >= target_mp_[i] + move)
-                {
-                    controller()->motorPool()[i+6*m_].setTargetPos(current_angle[i+6*m_] - move);
-                }
-            }
-        };
-
-
-        for (int i = 0; i < 12; i++)
-        {
-            current_angle[i] = controller()->motorPool()[i].actualPos();
-        }
-
-
-        std::copy(current_angle + 6, current_angle + 12, current_sa_angle);
-
-
-
-
-
-        double assem_pos[6]{ -0.726, 0.009930, 0.289672, PI / 4, -PI / 2, - PI / 4 };
-        double init_angle[6]{0};
-
-        model_a2.setOutputPos(assem_pos);
-        if(model_a2.inverseKinematics())
-        {
-            mout()<<"Error"<<std::endl;
-        }
-
-        model_a2.getInputPos(init_angle);
-
-        if(count()%1000 == 0)
-        {
-            mout()<<"current angle: "<<current_sa_angle[0]<<'\t'<<current_sa_angle[1]<<'\t'<<current_sa_angle[2]<<'\t'
-                    <<current_sa_angle[3]<<'\t'<<current_sa_angle[4]<<'\t'<<current_sa_angle[5]<<std::endl;
-        }
-
-        saJointMove(init_angle, 1);
-
-        if(motorsPositionCheck(current_sa_angle, init_angle, 6))
-        {
-            getForceData(imp_->arm1_init_force, 0, imp_->init);
-            getForceData(imp_->arm2_init_force, 1, imp_->init);
-
-            gc.saveInitForce(imp_->arm1_init_force, imp_->arm2_init_force);
-
-            mout()<<"Init Complete"<<std::endl;
-
-            imp_->init = true;
-            return 0;
-        }
-
-
-
-        if(count() == 20000)
-        {
-            mout()<<"Over Time"<<std::endl;
-        }
-
-        return 20000 - count();
-
-
-
-
-    }
-    Arm2Init::Arm2Init(const std::string& name)
-    {
-        aris::core::fromXmlString(command(),
-            "<Command name=\"2_back\"/>");
-    }
-    Arm2Init::~Arm2Init() = default;
-    KAANH_DEFINE_BIG_FOUR_CPP(Arm2Init)
-
-
     struct ModelGet::Imp {
         //Switch Model
         int m_;
@@ -4160,9 +3918,6 @@ namespace robot
                                << arm2_final_force[3] << '\t' << arm2_final_force[4] << '\t' << arm2_final_force[5] << std::endl;
                         break;
 
-		//Counter
-        int contact_count = 0;
-        int current_count = 0;
 
                     }
 
@@ -4519,61 +4274,14 @@ namespace robot
         //at(1) -> Arm2 -> blue
         auto& arm2 = dualArm.subModels().at(1);
 
-		//transform to model
-		auto& model_a1 = dynamic_cast<aris::dynamic::Model&>(arm1);
-		auto& model_a2 = dynamic_cast<aris::dynamic::Model&>(arm2);
+        //transform to model
+        auto& model_a1 = dynamic_cast<aris::dynamic::Model&>(arm1);
+        auto& model_a2 = dynamic_cast<aris::dynamic::Model&>(arm2);
 
-		//End Effector
-		auto& eeA1 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a1.generalMotionPool().at(0));
-		auto& eeA2 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a2.generalMotionPool().at(0));
+        //End Effector
+        auto& eeA1 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a1.generalMotionPool().at(0));
+        auto& eeA2 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a2.generalMotionPool().at(0));
 
-		//ver 1.0 not limit on vel, only limit force
-		static double tolerance = 0.00005;
-		static double init_angle[12] =
-		{ 0, 0, 5 * PI / 6, -5 * PI / 6, -PI / 2, 0 ,
-		0, 0, -5 * PI / 6, 5 * PI / 6, PI / 2, 0 };
-		//ver 2.0 limited vel, 20mm/s, 30deg/s
-		static double max_vel[6]{ 0.00002,0.00002,0.00002,0.0005,0.0005,0.0005 };
-
-        static double trigger_force[6]{ 0.5,0.5,0.5,0.0015,0.0015,0.0015 };
-
-		static double trigger_vel[6]{ 0.000001,0.000001,0.000001,0.0001,0.0001,0.0001 };
-        static double dead_zone[6]{ 0.1,0.1,0.1,0.0015,0.011,0.0015 };
-        static double limit_area[6]{17,8,8,0.6,0.6,0.6};
-
-        double p3_deadzone[6]{0,10,10,0,0,0};
-        double p4_deadzone[6]{0,0,0,0.2,0.2,0.2};
-        double p5_deadzone[6]{0,0,0,0.1,0.1,0.1};
-
-
-		GravComp gc;
-
-		double current_angle[12]{ 0 };
-		double current_sa_angle[6]{ 0 };
-
-		double comp_force[6]{ 0 };
-		double current_pm[16]{ 0 };
-		double current_pos[6]{ 0 };
-		double current_force[6]{ 0 };
-		double actual_force[6]{ 0 };
-		double filtered_force[6]{ 0 };
-		double transform_force[6]{ 0 };
-        double limited_force[6]{ 0 };
-
-
-		auto getForceData = [&](double* data_, int m_, bool init_)
-		{
-
-			int raw_force[6]{ 0 };
-
-			for (std::size_t i = 0; i < 6; ++i)
-			{
-                if (ecMaster()->slavePool()[8 + 7 * m_].readPdo(0x6020, 0x01 + i, raw_force + i, 32))
-					mout() << "error" << std::endl;
-
-				data_[i] = (static_cast<double>(raw_force[i]) / 1000.0);
-
-			}
 
         GravComp gc;
 
@@ -5162,20 +4870,9 @@ namespace robot
                 if (ecMaster()->slavePool()[8 + 7 * m_].readPdo(0x6020, 0x01 + i, raw_force + i, 32))
                     mout() << "error" << std::endl;
 
-                filtered_force_[i] = std::accumulate(imp_->force_buffer[i].begin(), imp_->force_buffer[i].end(), 0.0) / 20;
-			}
-		};
+                data_[i] = (static_cast<double>(raw_force[i]) / 1000.0);
 
-		auto forceDeadZone = [&](double* actual_force_, double* area_)
-		{
-			for (int i = 0; i < 6; i++)
-			{
-				if (abs(actual_force_[i]) < area_[i])
-				{
-					actual_force_[i] = 0;
-				}
-			}
-		};
+            }
 
             if (!init_)
             {
@@ -5730,7 +5427,6 @@ namespace robot
 
             }
 
-            return false;
         };
 
         auto daJointMove = [&](double target_mp_[12])
@@ -5766,7 +5462,8 @@ namespace robot
                 }
             }
 
-		};
+            return true;
+        };
 
         auto saJointMove = [&](double target_mp_[6], int m_)
         {
@@ -6005,72 +5702,10 @@ namespace robot
             }
         };
 
-                double dx[3]{ 0 };
-                double dth[3]{ 0 };
-                double dt = 0.001;
-
-                double desired_force[6]{ 0.2,0.2,0.2,0,0,0 };
-
-                //Safety Check
-                for (size_t i = 0; i < 3; i++)
-                {
-                    if (abs(transform_force[i]) > 30.0)
-                    {
-                        mout() << "Emergency Brake" << std::endl;
-
-                        mout() << "Brake force Phase3: " << transform_force[0] << '\t' << transform_force[1] << '\t' << transform_force[2] << '\t'
-                            << transform_force[3] << '\t' << transform_force[4] << '\t' << transform_force[5] << std::endl;
-
-                        return 0;
-                    }
-                }
-                if (count() % 100 == 0)
-                {
-                    mout() << "force: " << transform_force[0] << '\t' << transform_force[1] << '\t' << transform_force[2] << '\t'
-                        << transform_force[3] << '\t' << transform_force[4] << '\t' << transform_force[5] << '\t' << '\t' <<"  pos: " << current_pos[0] << '\t' << current_pos[1] << '\t' << current_pos[2] << '\t'
-                        << current_pos[3] << '\t' << current_pos[4] << '\t' << current_pos[5] << std::endl;
-                }
-
-
-                if (forceCheck(transform_force, desired_force, 5))
-                {
-                    imp_->phase4 = true;
-                    mout() << "Allign Complete" << std::endl;
-                    mout() << "Allign Pos: " << current_pos[0] << '\t' << current_pos[1] << '\t' << current_pos[2] << '\t'
-                        << current_pos[3] << '\t' << current_pos[4] << '\t' << current_pos[5] << std::endl;
-                    mout() << "Allign force: " << transform_force[0] << '\t' << transform_force[1] << '\t' << transform_force[2] << '\t'
-                        << transform_force[3] << '\t' << transform_force[4] << '\t' << transform_force[5] << std::endl;
-
-                }
-                else
-                {
-
-                    if(limited_force[0] >= (imp_->phase3_fd[0] - 5.0) && limited_force[0] <= (imp_->phase3_fd[0] + 1.5))
-                    {
-                        limited_force[0] = imp_->phase3_fd[0];
-                    }
-
-                    forceDeadZone(limited_force, p4_deadzone);
-
-//                    for(int i = 4; i<6; i++)
-//                    {
-//                        if(limited_force[i] > 0)
-//                        {
-//                            limited_force[i] -= 0.1;
-//                        }
-//                        else if(limited_force[i] < 0)
-//                        {
-//                            limited_force[i] += 0.1;
-//                        }
-//                    }
-
-
-                    //Impedence Controller
-                    for (int i = 0; i < 3; i++)
-                    {
-                        // da = (Fd-Fe-Bd*(v-vd)-k*(x-xd))/M
-                        acc[i] = (-imp_->phase4_fd[i] + limited_force[i] - imp_->phase4_B[i] * (imp_->v_c[i] - imp_->v_d[i])) / imp_->phase4_M[i];
-                    }
+        for (int i = 0; i < 12; i++)
+        {
+            current_angle[i] = controller()->motorPool()[i].actualPos();
+        }
 
 
         std::copy(current_angle + 6, current_angle + 12, current_sa_angle);
@@ -6461,8 +6096,6 @@ namespace robot
                         ome[i] = (-imp_->phase4_fd[i + 3] + arm2_final_force[i + 3] - imp_->phase4_B[i + 3] * (imp_->v_c[i + 3] - imp_->v_d[i + 3])) / imp_->phase4_M[i + 3];
                     }
 
-        //Switch Point
-        int p_;
 
                     for (int i = 1; i < 3; i++)
                     {
@@ -6488,11 +6121,6 @@ namespace robot
                     //Convert rm to pe
                     aris::dynamic::s_rm2re(rm_target, arm2_current_pos + 3, "321");
 
-        //ver 1.0 not limit on vel, only limit force
-        static double tolerance = 0.00005;
-        //ver 2.0 limited vel, 20mm/s, 30deg/s
-        static double max_vel[6]{ 0.00002,0.00002,0.00002,0.0005,0.0005,0.0005 };
-        static double dead_zone[6]{ 0.1,0.1,0.1,0.0006,0.00920644,0.0006 };
 
 //                    mout()<<"desired pos " << arm2_current_pos[0] << '\t' << arm2_current_pos[1] << '\t' << arm2_current_pos[2] << '\t'
 //                         << arm2_current_pos[3] << '\t' << arm2_current_pos[4] << '\t' << arm2_current_pos[5] << std::endl;
@@ -7328,13 +6956,6 @@ namespace robot
                     mout() << "Assembly Start !" << std::endl;
                 }
 
-            getForceData(arm2_actual_force, 1, imp_->init);
-            gc.getCompFT(arm2_current_pm, imp_->arm2_l_vector, imp_->arm2_p_vector, arm2_comp_force);
-
-            for (size_t i = 0; i < 6; i++)
-            {
-                arm1_comp_force[i] = arm1_actual_force[i] + arm1_comp_force[i];
-                arm2_comp_force[i] = arm2_actual_force[i] + arm2_comp_force[i];
             }
             //Phase 2 Contact
             else if (imp_->phase1 && !imp_->phase2)
@@ -7365,9 +6986,7 @@ namespace robot
                 eeA2.getMpm(a2_pm);
                 eeA2.getP(arm2_current_pos);
 
-
-                //Define Initial Position displacment
-                std::array<std::array<double, 3>, 13> points =
+                if (count() % 1000 == 0)
                 {
                     mout() << "force: " << arm2_final_force[0] << '\t' << arm2_final_force[1] << '\t' << arm2_final_force[2] << '\t'
                         << arm2_final_force[3] << '\t' << arm2_final_force[4] << '\t' << arm2_final_force[5] << std::endl;
@@ -8453,15 +8072,6 @@ namespace robot
                         ome[i] = (-imp_->phase4_fd[i + 3] + arm2_final_force[i + 3] - imp_->phase4_B[i + 3] * (imp_->v_c[i + 3] - imp_->v_d[i + 3])) / imp_->phase4_M[i + 3];
                     }
 
-            //Safety Check
-            for (size_t i = 0; i < 3; i++)
-            {
-                if (abs(transform_force[i]) > 30)
-                {
-                    mout() << "Emergency Brake" << std::endl;
-                    return 0;
-                }
-            }
 
                     for (int i = 1; i < 3; i++)
                     {

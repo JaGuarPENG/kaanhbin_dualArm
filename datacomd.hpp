@@ -46,6 +46,23 @@ namespace data
 
     };
 
+    class GetHdData :public aris::core::CloneObject<GetHdData, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~GetHdData();
+        explicit GetHdData(const std::string& name = "GetHdData");
+        KAANH_DECLARE_BIG_FOUR(GetHdData)
+
+    private:
+        struct Imp;
+        aris::core::ImpPtr<Imp> imp_;
+
+
+    };
+
 
 
 }

@@ -61,6 +61,7 @@
         "set": "cpp",
         "string": "cpp",
         "variant": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

@@ -85,6 +85,24 @@ namespace rivet
 
     };
 
+    class RivetHoleDection :public aris::core::CloneObject<RivetHoleDection, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~RivetHoleDection();
+        explicit RivetHoleDection(const std::string& name = "RivetHoleDection");
+        KAANH_DECLARE_BIG_FOUR(RivetHoleDection)
+
+    private:
+        struct Imp;
+        aris::core::ImpPtr<Imp> imp_;
+
+
+    };
+
+
 
 
 }

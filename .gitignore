@@ -364,10 +364,12 @@ FodyWeavers.xsd
 
 test_data/
 
-#search_test/
+search_test/
 
 script/
 
 password
 
 build/
+
+rivet_hd_test/
