@@ -102,6 +102,23 @@ namespace rivet
 
     };
 
+    class RivetCalib :public aris::core::CloneObject<RivetCalib, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~RivetCalib();
+        explicit RivetCalib(const std::string& name = "RivetCalib");
+        KAANH_DECLARE_BIG_FOUR(RivetCalib)
+
+    private:
+        struct Imp;
+        aris::core::ImpPtr<Imp> imp_;
+
+
+    };
+
 
 
 

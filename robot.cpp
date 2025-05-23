@@ -271,28 +271,173 @@ namespace robot
     KAANH_DEFINE_BIG_FOUR_CPP(ModelSetPos)
 
 
-	
+	struct ModelInit::Imp{
+
+        //Flag
+        bool init = false;
+
+        //Arm1
+        double arm1_init_force[6]{ 0 };
+        double arm1_p_vector[6]{ 0 };
+        double arm1_l_vector[6]{ 0 };
+
+        //Arm2
+        double arm2_init_force[6]{ 0 };
+        double arm2_p_vector[6]{ 0 };
+        double arm2_l_vector[6]{ 0 };
+
+        //Arm1 Force Buffer
+        std::array<double, 10> arm1_force_buffer[6] = {};
+        int arm1_buffer_index[6]{ 0 };
+
+        //Arm2 Force Buffer
+        std::array<double, 10> arm2_force_buffer[6] = {};
+        int arm2_buffer_index[6]{ 0 };
+
+    };
     auto ModelInit::prepareNrt()->void {
 
         for (auto& m : motorOptions()) m =
-            aris::plan::Plan::CHECK_NONE |
             aris::plan::Plan::NOT_CHECK_POS_CONTINUOUS_SECOND_ORDER;
+
+        GravComp gc;
+		gc.loadPLVector(imp_->arm1_p_vector, imp_->arm1_l_vector, imp_->arm2_p_vector, imp_->arm2_l_vector);
+		mout() << "Load P & L Vector" << std::endl;
+
 
 
     }
     auto ModelInit::executeRT()->int {
 
+        
+        //dual transform modelbase into multimodel
+		auto& dualArm = dynamic_cast<aris::dynamic::MultiModel&>(modelBase()[0]);
+		//at(0) -> Arm1 -> white
+		auto& arm1 = dualArm.subModels().at(0);
+		//at(1) -> Arm2 -> blue
+		auto& arm2 = dualArm.subModels().at(1);
+
+		//transform to model
+		auto& model_a1 = dynamic_cast<aris::dynamic::Model&>(arm1);
+		auto& model_a2 = dynamic_cast<aris::dynamic::Model&>(arm2);
+
+		//End Effector
+		auto& eeA1 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a1.generalMotionPool().at(0));
+		auto& eeA2 = dynamic_cast<aris::dynamic::GeneralMotion&>(model_a2.generalMotionPool().at(0));
 
         double eePos[12] = { 0 };
 
         static double move = 0.0001;
         static double tolerance = 0.00009;
 
+        GravComp gc;
+
         static double init_pos[12] =
         { 0, 0, 5 * PI / 6, -5 * PI / 6, -PI / 2, 0,
-        0, 0, -5 * PI / 6, PI / 3, PI / 2, 0 };
+        0, 0, -2 * PI / 3, PI / 6, PI / 2, 0 };
 
+        auto getForceData = [&](double* data_, int m_, bool init_)
+		{
 
+			int raw_force[6]{ 0 };
+
+			for (std::size_t i = 0; i < 6; ++i)
+			{
+                if (ecMaster()->slavePool()[8 + 7 * m_].readPdo(0x6020, 0x01 + i, raw_force + i, 32))
+					mout() << "error" << std::endl;
+
+				data_[i] = (static_cast<double>(raw_force[i]) / 1000.0);
+
+			}
+
+			if (!init_)
+			{
+				mout() << "Compensate Init Force" << std::endl;
+			}
+			else
+			{
+				if (m_ == 0)
+				{
+					for (std::size_t i = 0; i < 6; ++i)
+					{
+
+						data_[i] = (static_cast<double>(raw_force[i]) / 1000.0) - imp_->arm1_init_force[i];
+
+					}
+				}
+				else if (m_ == 1)
+				{
+					for (std::size_t i = 0; i < 6; ++i)
+					{
+
+						data_[i] = (static_cast<double>(raw_force[i]) / 1000.0) - imp_->arm2_init_force[i];
+
+					}
+				}
+                else
+                {
+                    mout() << "Wrong Model" << std::endl;
+                }
+			}
+
+		};
+
+        if(count()==1)
+        {
+            getForceData(imp_->arm1_init_force, 0, imp_->init);
+            getForceData(imp_->arm2_init_force, 1, imp_->init);
+             master()->logFileRawName(std::string("/home/kaanh/Desktop/kaanhbin/force_comp_data/forceComp_" + aris::core::logFileTimeFormat(std::chrono::system_clock::now())).c_str());
+            imp_->init = true;
+        }
+
+        double current_arm1_pm[16]{0};
+        double current_arm1_force[6]{0};
+        
+        double current_arm2_pm[16]{0};
+        double current_arm2_force[6]{0};
+
+        double arm1_comp_force[6]{0};
+        double arm2_comp_force[6]{0};
+
+        double arm1_actual_force[6]{0};
+        double arm2_actual_force[6]{0};
+
+        double arm1_raw_force[6]{0};
+        double arm2_raw_force[6]{0};
+
+        eeA1.getMpm(current_arm1_pm);
+		eeA2.getMpm(current_arm2_pm);
+
+		getForceData(current_arm1_force, 0, imp_->init);
+        getForceData(current_arm2_force, 1, imp_->init);
+		
+        gc.getCompFT(current_arm1_pm, imp_->arm1_l_vector, imp_->arm1_p_vector, arm1_comp_force);
+        gc.getCompFT(current_arm2_pm, imp_->arm2_l_vector, imp_->arm2_p_vector, arm2_comp_force);
+
+		for (int i = 0; i < 6; i++)
+		{
+            arm1_actual_force[i] = arm1_comp_force[i] + current_arm1_force[i];
+            arm2_actual_force[i] = arm2_comp_force[i] + current_arm2_force[i];
+		}
+
+        for (int i = 0; i < 6; i++)
+        {
+            arm1_raw_force[i] = current_arm1_force[i];
+            arm2_raw_force[i] = current_arm2_force[i];
+        }
+
+        // if(count()%50==0)
+        // {
+        //     lout()<<arm1_raw_force[0]<<'\t'<<arm1_raw_force[1]<<'\t'<<arm1_raw_force[2]<<'\t'
+        //     <<arm1_raw_force[3]<<'\t'<<arm1_raw_force[4]<<'\t'<<arm1_raw_force[5]<<'\t'
+        //     <<arm1_actual_force[0]<<'\t'<<arm1_actual_force[1]<<'\t'<<arm1_actual_force[2]<<'\t'
+        //     <<arm1_actual_force[3]<<'\t'<<arm1_actual_force[4]<<'\t'<<arm1_actual_force[5]<<'\t'
+        //     <<arm2_raw_force[0]<<'\t'<<arm2_raw_force[1]<<'\t'<<arm2_raw_force[2]<<'\t'
+        //     <<arm2_raw_force[3]<<'\t'<<arm2_raw_force[4]<<'\t'<<arm2_raw_force[5]<<'\t'
+        //     <<arm2_actual_force[0]<<'\t'<<arm2_actual_force[1]<<'\t'<<arm2_actual_force[2]<<'\t'
+        //     <<arm2_actual_force[3]<<'\t'<<arm2_actual_force[4]<<'\t'<<arm2_actual_force[5]<<std::endl;
+        // }
+        
         modelBase()->setInputPos(init_pos);
 
         if (modelBase()->forwardDynamics())
@@ -1325,19 +1470,19 @@ namespace robot
 		{
 			static double init_angle[12] =
 			{ 0, 0, 5 * PI / 6, -5 * PI / 6, -PI / 2, 0,
-			0, 0, -5 * PI / 6, PI / 3, PI / 2, 0 };
+			0, 0, -2 * PI / 3, PI / 6, PI / 2, 0 };
 
 			static double angle1[12] =
 			{ 0, 0, 5 * PI / 6, -17 * PI / 18, -PI / 2, 0 ,
-			0, 0, -5 * PI / 6, 17 * PI / 18, PI / 2, 0 };
+			0, 0, -2 * PI / 3, PI / 4, PI / 2, 0 };
 
 			static double angle2[12] =
 			{ 0, 0, 5 * PI / 6, -PI / 2, -PI / 3, 0 ,
-			0, 0, -5 * PI / 6, PI / 2, PI / 3, 0 };
+			0, 0, -2 * PI / 3, PI / 4, 7 * PI / 12, 0 };
 
 			static double angle3[12] =
 			{ 0, 0, 5 * PI / 6, -2 * PI / 3, -2 * PI / 3, 0 ,
-			0, 0, -5 * PI / 6, 2 * PI / 3, 2 * PI / 3, 0 };
+			0, 0, -2 * PI / 3, PI / 12, 5 * PI / 12, 0 };
 
 
 			//// Arm 1 Angle
@@ -1634,7 +1779,6 @@ namespace robot
 	{
 
 		for (auto& m : motorOptions()) m =
-			aris::plan::Plan::CHECK_NONE |
 			aris::plan::Plan::NOT_CHECK_POS_CONTINUOUS_SECOND_ORDER;
 
 		GravComp gc;
@@ -2722,7 +2866,11 @@ namespace robot
 //        double B[6]{ 300,300,300,15,15,15 };
 //        double M[6]{ 3,3,3,10,10,10 };
 
-        double B[6]{ 1000,1000,1000,15,80,80 };
+        //1000  10    80
+        // double B[6]{ 800,800,800,15,15,15 };
+        // double M[6]{ 5,5,5,10,5,5 };
+
+        double B[6]{ 1000,1000,1000,15,15,15 };
         double M[6]{ 10,10,10,10,5,5 };
 
 		double Ke[6]{ 220000,220000,220000,220000,220000,220000 };
@@ -2780,7 +2928,7 @@ namespace robot
 		0, 0, -5 * PI / 6, 5 * PI / 6, PI / 2, 0 };
 		static double max_vel[6]{ 0.2,0.2,0.2,0.0005,0.0005,0.0001 };
         //static double trigger_force[6]{ 0.5,0.5,0.5,0.001,0.001,0.001 };
-        static double trigger_force[6]{ 3.0,3.0,5.0,0.5,0.5,0.5 };
+        static double trigger_force[6]{ 1,1,1,0.2,0.2,0.2 };
 		static double max_force[6]{ 10,10,10,5,5,5 };
 		static double trigger_vel[6]{ 0.0001,0.0001,0.0001,0.0001,0.0001,0.0001 };
 
@@ -2985,7 +3133,7 @@ namespace robot
 
             getForceData(imp_->arm1_init_force, 0, imp_->init);
             getForceData(imp_->arm2_init_force, 1, imp_->init);
-            master()->logFileRawName("ForceDrag");
+            //master()->logFileRawName(std::string("/home/kaanh/Desktop/kaanhbin/force_comp_data/forceComp2_" + aris::core::logFileTimeFormat(std::chrono::system_clock::now())).c_str());
             imp_->init = true;
 
 		}
@@ -3169,11 +3317,13 @@ namespace robot
 				}
 
 
-//                if(count()%10==0)
-//                {
-//                    lout()<<"raw"<<'\t'<<current_force[0]+imp_->arm2_init_force[0]<<'\t'<<current_force[1]+imp_->arm2_init_force[1]<<'\t'<<current_force[2]+imp_->arm2_init_force[2]<<'\t'
-//                            <<"comp"<<'\t'<<actual_force[0]<<'\t'<<actual_force[1]<<'\t'<<actual_force[2]<<std::endl;
-//                }
+               if(count()%50==0)
+               {
+                   lout()<<"raw"<<'\t'<<current_force[0]+imp_->arm2_init_force[0]<<'\t'<<current_force[1]+imp_->arm2_init_force[1]<<'\t'<<current_force[2]+imp_->arm2_init_force[2]<<'\t'
+                   <<'\t'<<current_force[3]+imp_->arm2_init_force[3]<<'\t'<<current_force[4]+imp_->arm2_init_force[4]<<'\t'<<current_force[5]+imp_->arm2_init_force[5]<<'\t'
+                           <<"comp"<<'\t'<<actual_force[0]<<'\t'<<actual_force[1]<<'\t'<<actual_force[2]<<'\t'
+                           <<actual_force[3]<<'\t'<<actual_force[4]<<'\t'<<actual_force[5]<<std::endl;
+               }
 
                 //Force Filter
                 forceFilter(actual_force,filtered_force);
@@ -3249,14 +3399,14 @@ namespace robot
 
 
 //				//pose
-                // for (int i = 1; i < 3; i++)
+                // for (int i = 0; i < 3; i++)
                 // {
                 //     // Caculate Omega
                 //     ome[i] = (-imp_->f_d[i + 3] + transform_force[i + 3] - imp_->B[i + 3] * (imp_->v_c[i + 3] - imp_->v_d[i + 3])) / imp_->M[i + 3];
                 // }
 
 
-                // for (int i = 1; i < 3; i++)
+                // for (int i = 0; i < 3; i++)
                 // {
                 //     // Angluar Velocity
                 //     imp_->v_c[i + 3] += ome[i] * dt;
@@ -4204,11 +4354,6 @@ namespace robot
 }
     Demo::~Demo() = default;
     KAANH_DEFINE_BIG_FOUR_CPP(Demo)
-
-
-
-
-
 
 
 

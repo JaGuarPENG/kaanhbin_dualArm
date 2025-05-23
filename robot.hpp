@@ -22,6 +22,8 @@ namespace robot
 		KAANH_DECLARE_BIG_FOUR(ModelInit)
 
 	private:
+		struct Imp;
+        aris::core::ImpPtr<Imp> imp_;
 
 	};
 

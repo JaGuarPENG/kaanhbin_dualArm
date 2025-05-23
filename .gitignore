@@ -368,8 +368,16 @@ search_test/
 
 script/
 
-password
+a_password
 
 build/
 
 rivet_hd_test/
+
+force_comp_data/
+
+hd_data_collect/
+
+10mm_hole_test/
+
+12mm_hole_test/

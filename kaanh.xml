@@ -2125,6 +2125,12 @@
                     </GroupParam>
                 </Command>
             </GetHdData>
+            <ZeroG name="plan">
+                <Command __prop_name__="command" name="zerog"/>
+            </ZeroG>
+            <RivetCalib name="plan">
+                <Command __prop_name__="command" name="r_calib"/>
+            </RivetCalib>
         </PlanPoolObject>
     </PlanRoot>
     <InterfacePoolObject __prop_name__="interface">
@@ -2271,36 +2277,36 @@
             <Distributor name="Distributor">
                 <DistributeRuleVec __prop_name__="_distribute_rules">
                     <DistributeRule module="TimeCounter" cmds="time"/>
-                    <DistributeRule module="ModbusRtuManager" cmds="rtuget;rtuset"/>
-                    <DistributeRule module="ZeroCalib" cmds="ZeroCalib"/>
-                    <DistributeRule module="About" cmds="about"/>
-                    <DistributeRule module="SplcController" cmds="splcctrl;splcquery"/>
-                    <DistributeRule module="FileOperator" cmds="fop_open_dir;fop_rename_dir;fop_create_file;fop_remove_file;fop_open_file;fop_cut;fop_modify_file;fop_remove_dir;fop_create_dir;fop_copy;fop_rename_file"/>
-                    <DistributeRule module="kaanh::multi_motion::MultiModelControl" cmds="set_adj_limit;get_adj_limit;get_speed_limit;get_coupling_info;set_coupling_info;set_speed_limit"/>
-                    <DistributeRule module="IoManager" cmds="ioquery;ioctrl"/>
-                    <DistributeRule module="UserManagement" cmds="pwdquery;logout;user;login;pwd"/>
-                    <DistributeRule module="ModbusTcpServer" cmds="mtcp_slave_query;mtcp_slave_ctrl;mtcp_slave_edit"/>
-                    <DistributeRule module="SemaManager" cmds="semaquery;semactrl"/>
-                    <DistributeRule module="Pallet3" cmds="PkgPallet"/>
-                    <DistributeRule module="Web3DModel" cmds="set_3dname;set_3dpos;get_3dmodel"/>
-                    <DistributeRule module="PgmController" cmds="pgmadmin_delete_program;pgmadmin_create_project;pgmctrl;pgmadmin_rename_project;pgmadmin_create_program;pgmadmin_rename_program;pgmedit_update_var;pgmedit_add_var;pgmedit_insert_stmts;pgmquery;pgmedit_save;pgmedit_uncomment_stmts;pgmedit_delete_var;pgmadmin_delete_project;pgmedit_update_stmt;pgmedit_remove_stmts;pgmedit_update_var_in_mem;pgmedit_comment_stmts;pgmedit_rename_var"/>
-                    <DistributeRule module="Driver" cmds="driver_break;get_sdo_val;set_sdo_val;driver_err_quiry;set_virtual;driver_err_clean;encoder_clean"/>
-                    <DistributeRule module="AreaManager" cmds="areaquery;areactrl;areaedit"/>
-                    <DistributeRule module="Log" cmds="log;log_solve"/>
                     <DistributeRule module="Pallet" cmds="pallet"/>
-                    <DistributeRule module="SystemSema" cmds="ds;pos_sema_param;virtual_ds;unshield;en;shield;virtual_en;manual_en;manual_ds;force_sema_param"/>
-                    <DistributeRule module="kaanh::package::Force" cmds="get_force_sensor_ee_id;get_fsg_par;get_assemble_par;get_fs_move_par;get_force_guidance_admit_par;get_force_holding_detect_time;get_fs_protection_switch;stop_fsg;set_force_sensor_load_id;get_axis_assemble_par;get_filter_param;set_fs_protection_switch;set_fs_move_par;get_fs_switch;set_force_guidance_admit_par;set_force_holding_detect_time;set_fsg_is_open;get_force_protection;set_fs_calibrate;get_fsl_par;set_force_protection;get_fs_limit;get_force_sensor_load_id;set_filter_param;get_force_trace_files;set_axis_assemble_par;delete_force_trace_file;set_fsg_par;set_fs_limit;start_fsg;set_fs_switch;set_assemble_par;set_force_sensor_ee_id"/>
-                    <DistributeRule module="kaanh::package::ConveyorManager" cmds="set_conveyor_vel;conveyor_calib;conveyor_query;clear_count;conveyor_ctrl;camera_calib;set_tolerance;get_conveyor_vel;get_tolerance;conveyor_edit;cal_circle"/>
+                    <DistributeRule module="AreaManager" cmds="areactrl;areaquery;areaedit"/>
+                    <DistributeRule module="About" cmds="about"/>
+                    <DistributeRule module="ZeroCalib" cmds="ZeroCalib"/>
+                    <DistributeRule module="kaanh::multi_motion::MultiModelControl" cmds="set_coupling_info;set_adj_limit;get_adj_limit;get_coupling_info;get_speed_limit;set_speed_limit"/>
+                    <DistributeRule module="ModbusTcpServer" cmds="mtcp_slave_query;mtcp_slave_ctrl;mtcp_slave_edit"/>
+                    <DistributeRule module="kaanh::package::Force" cmds="set_axis_assemble_par;delete_force_trace_file;set_filter_param;set_fs_switch;set_assemble_par;set_fsg_par;get_force_protection;set_fs_calibrate;get_filter_param;set_force_sensor_load_id;stop_fsg;get_force_guidance_admit_par;get_fs_protection_switch;get_force_holding_detect_time;set_fs_move_par;get_force_sensor_ee_id;get_assemble_par;set_force_holding_detect_time;set_fsg_is_open;set_fs_limit;set_force_guidance_admit_par;get_fs_switch;set_force_sensor_ee_id;get_force_sensor_load_id;get_axis_assemble_par;set_fs_protection_switch;get_force_trace_files;set_force_protection;start_fsg;get_fsl_par;get_fs_limit;get_fs_move_par;get_fsg_par"/>
+                    <DistributeRule module="SystemSema" cmds="unshield;manual_ds;ds;en;virtual_en;manual_en;pos_sema_param;virtual_ds;shield;force_sema_param"/>
+                    <DistributeRule module="UserManagement" cmds="pwdquery;logout;user;pwd;login"/>
+                    <DistributeRule module="IoManager" cmds="ioquery;ioctrl"/>
+                    <DistributeRule module="FileOperator" cmds="fop_create_dir;fop_remove_file;fop_open_dir;fop_remove_dir;fop_cut;fop_modify_file;fop_open_file;fop_create_file;fop_rename_dir;fop_rename_file;fop_copy"/>
+                    <DistributeRule module="SplcController" cmds="splcctrl;splcquery"/>
+                    <DistributeRule module="FunctionGather" cmds="delete_io;controller_reboot;get_xml_io;network_restart;modify_network;set_start_default_speed;add_io;get_sample_period_ms;network_quiry;get_io_names;create_network;xml_slave;slave_attr"/>
+                    <DistributeRule module="kaanh::package::ConveyorManager" cmds="conveyor_calib;get_conveyor_vel;get_tolerance;set_conveyor_vel;set_tolerance;camera_calib;conveyor_ctrl;clear_count;conveyor_edit;cal_circle;conveyor_query"/>
                     <DistributeRule module="PkgManager" cmds="pkg"/>
-                    <DistributeRule module="Get" cmds="get"/>
-                    <DistributeRule module="System" cmds="pkg_query;rpath_query;lpath_query;reboot;udisk;get_shortcut_path;copy_files;getfile;controller;rename_files;language;systime;prj_query"/>
-                    <DistributeRule module="FunctionGather" cmds="get_io_names;slave_attr;add_io;delete_io;modify_network;network_restart;xml_slave;get_sample_period_ms;set_start_default_speed;network_quiry;create_network;get_xml_io;controller_reboot"/>
-                    <DistributeRule module="kaanh::package::Current" cmds="write_fr_static_index;collision_detection_ctrl;read_torque;write_fr_dynamic_index;write_collision_detection_state;write_max_static_vel;read_fr_dynamic_index;write_torque;read_fr_static_index;write_collision_detection_sensitivity;read_max_static_vel;read_collision_detection_state;read_collision_detection_sensitivity"/>
-                    <DistributeRule module="ExternalAuto" cmds="get_start_load_program;servo_confirm;program_bind;program_unbind_all;program_quiry;external_singal_from_bind;external_singal_from;set_start_load_program;external_pgmvel_singal_from_bind;program_unbind;program_bind_quiry"/>
-                    <DistributeRule module="kaanh::robot::ConfigModule" cmds="write_motor;calculate_start;read_motor;record_motors_datas;calculate_stop"/>
-                    <DistributeRule module="RobotConfig" cmds="read_dh;write_dh"/>
+                    <DistributeRule module="ModbusRtuManager" cmds="rtuset;rtuget"/>
                     <DistributeRule module="Trajfc" cmds="trajfc"/>
-                    <DistributeRule module="kaanh::multi_motion::JogControl" cmds="read_jogc_dec;write_jogc_acc;read_jogc_acc;write_jogj_acc;read_jogj_acc;write_jogj_dec;write_jogj_vel;read_jogj_vel;read_jogc_vel;read_jogj_dec;write_jogc_dec;write_jogc_vel"/>
+                    <DistributeRule module="kaanh::multi_motion::JogControl" cmds="write_jogc_vel;write_jogj_dec;write_jogj_vel;read_jogc_dec;read_jogc_vel;read_jogj_vel;read_jogj_dec;write_jogc_acc;read_jogj_acc;read_jogc_acc;write_jogc_dec;write_jogj_acc"/>
+                    <DistributeRule module="System" cmds="udisk;getfile;copy_files;rpath_query;controller;lpath_query;pkg_query;get_shortcut_path;language;rename_files;prj_query;reboot;systime"/>
+                    <DistributeRule module="Get" cmds="get"/>
+                    <DistributeRule module="Pallet3" cmds="PkgPallet"/>
+                    <DistributeRule module="Web3DModel" cmds="get_3dmodel;set_3dname;set_3dpos"/>
+                    <DistributeRule module="PgmController" cmds="pgmadmin_create_program;pgmedit_rename_var;pgmedit_add_var;pgmquery;pgmedit_insert_stmts;pgmedit_save;pgmctrl;pgmadmin_rename_program;pgmedit_update_stmt;pgmadmin_delete_program;pgmedit_comment_stmts;pgmadmin_rename_project;pgmadmin_create_project;pgmedit_delete_var;pgmedit_uncomment_stmts;pgmedit_update_var;pgmedit_remove_stmts;pgmadmin_delete_project;pgmedit_update_var_in_mem"/>
+                    <DistributeRule module="SemaManager" cmds="semactrl;semaquery"/>
+                    <DistributeRule module="ExternalAuto" cmds="get_start_load_program;servo_confirm;external_singal_from_bind;program_quiry;program_bind_quiry;program_unbind;external_pgmvel_singal_from_bind;set_start_load_program;program_bind;external_singal_from;program_unbind_all"/>
+                    <DistributeRule module="kaanh::robot::ConfigModule" cmds="write_motor;calculate_stop;record_motors_datas;calculate_start;read_motor"/>
+                    <DistributeRule module="RobotConfig" cmds="write_dh;read_dh"/>
+                    <DistributeRule module="Driver" cmds="get_sdo_val;set_sdo_val;driver_err_clean;set_virtual;driver_err_quiry;encoder_clean;driver_break"/>
+                    <DistributeRule module="Log" cmds="log_solve;log"/>
+                    <DistributeRule module="kaanh::package::Current" cmds="write_collision_detection_sensitivity;write_collision_detection_state;read_fr_static_index;read_fr_dynamic_index;read_torque;write_fr_static_index;write_torque;collision_detection_ctrl;write_max_static_vel;read_max_static_vel;write_fr_dynamic_index;read_collision_detection_state;read_collision_detection_sensitivity"/>
                 </DistributeRuleVec>
             </Distributor>
             <FileOperator name="FileOperator"/>
