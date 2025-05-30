@@ -2729,7 +2729,7 @@ namespace rivet
         //Alter Parameter
         double phase4_B2[6]{2500,2500,8000,3,3,3};
         double phase4_M2[6]{ 100,100,100,2,2,2 };
-        double phase5_B[6]{ 3500,3500,30000,0,0,0 };
+        double phase5_B[6]{ 5000,5000,30000,0,0,0 };
         double phase5_M[6]{ 100,100,400,0,0,0 };
         double phase6_B[6]{ 3500,3500,2500,0,0,0  };
         double phase6_M[6]{ 100,100,100,0,0,0 };
@@ -2831,8 +2831,8 @@ namespace rivet
         //Gen coords
         std::vector<std::array<double, 2>> gen_points;
         //Init Pos
-        //double init_pos[2]{-0.622144, -0.206780};//10mm
-        double init_pos[2]{-0.622925, -0.102052};//12mm
+        double init_pos[2]{-0.622144, -0.206780};//10mm
+        //double init_pos[2]{-0.622925, -0.102052};//12mm
     };
     auto RivetHoleDection::prepareNrt() -> void
     {
@@ -2890,7 +2890,7 @@ namespace rivet
 		// }		
         gc.loadPLVector(imp_->arm1_p_vector, imp_->arm1_l_vector, imp_->arm2_p_vector, imp_->arm2_l_vector);
         mout() << "Load P & L Vector" << std::endl;
-        std::ifstream file("gen_coordinates.txt");
+        std::ifstream file("gen_coordinates_10_150.txt");
         if (!file.is_open()) {
             std::cerr << "无法打开文件 gen_coordinates.txt!" << std::endl;
         }
@@ -3322,8 +3322,8 @@ namespace rivet
         std::copy(current_angle + 6, current_angle + 12, current_sa_angle);
         if(!imp_->init)
         {
-            //double assem_pos[6]{ -0.622364, -0.206756, 0.08, PI, 0, PI };//10mm
-            double assem_pos[6]{ -0.622925, -0.102052, 0.067, PI, 0, PI  }; //12mm
+            double assem_pos[6]{ -0.622364, -0.206756, 0.08, PI, 0, PI };//10mm
+            //double assem_pos[6]{ -0.622925, -0.102052, 0.067, PI, 0, PI  }; //12mm
             double init_angle[6]{0};
             model_a2.setOutputPos(assem_pos);
             if(model_a2.inverseKinematics())
@@ -3383,8 +3383,8 @@ namespace rivet
             if (!imp_->phase1)
             {
                 //Tool
-                //double assem_pos[6]{ -0.622144, -0.206780, 0.055, PI, 0, PI  }; //10mm
-                double assem_pos[6]{ -0.622925, -0.102052, 0.067, PI, 0, PI  }; //12mm
+                double assem_pos[6]{ -0.622144, -0.206780, 0.055, PI, 0, PI  }; //10mm
+                //double assem_pos[6]{ -0.622925, -0.102052, 0.067, PI, 0, PI  }; //12mm
                 double assem_angle[6]{ 0 };
                 double assem_rm[9]{ 0 };
                 //Define Initial Rotate displacment
@@ -3575,7 +3575,7 @@ namespace rivet
                     mout() << "force: " << arm2_final_force[0] << '\t' << arm2_final_force[1] << '\t' << arm2_final_force[2] << '\t'
                            << "pos: " << arm2_current_pos[0] << '\t' << arm2_current_pos[1] << '\t' << arm2_current_pos[2] << std::endl;
                 }
-                if (posCheck(arm2_current_pos, 5))
+                if (posCheck(arm2_current_pos, 10))
                 {
                     imp_->phase3 = true;
                     mout() << "Pos 3 Complete" << std::endl;
@@ -3590,7 +3590,7 @@ namespace rivet
                     for(int i = 0; i<6; i++){
                         imp_->v_c[i] = 0;
                     }
-                    master()->logFileRawName(std::string("/home/kaanh/Desktop/kaanhbin/12mm_hole_test/12mm_" + aris::core::logFileTimeFormat(std::chrono::system_clock::now())).c_str());
+                    master()->logFileRawName(std::string("/home/kaanh/Desktop/kaanhbin/10mm_hole_test/10mm_" + aris::core::logFileTimeFormat(std::chrono::system_clock::now())).c_str());
                     imp_->total_search_count = count();
                     //mout()<<imp_->theta * 57.3<<'\t'<<imp_->real_theta * 57.3<<std::endl;
                     x_error = std::abs(arm2_current_pos[0]-imp_->init_pos[0]);
@@ -3600,7 +3600,7 @@ namespace rivet
                 }
                 else
                 {
-                    if(arm2_final_force[2] >= (imp_->phase3_fd[2] - 2.0) && arm2_final_force[2] <= (imp_->phase3_fd[2] + 3.0)){
+                    if(arm2_final_force[2] >= (imp_->phase3_fd[2] - 2.0) && arm2_final_force[2] <= (imp_->phase3_fd[2] + 4.5)){
                         arm2_final_force[2] = imp_->phase3_fd[2];
                     }
                     //Impedence Controller
@@ -3833,7 +3833,7 @@ namespace rivet
                    <<'\t'<<arm2_final_force[3]<<'\t'<<arm2_final_force[4]<<'\t'<<arm2_final_force[5]
                    <<'\t'<<imp_->depth<<'\t'<< imp_->y_movement <<'\t'<< imp_->x_movement <<'\t'<< count() << std::endl;
                 }
-                if (posCheck(arm2_current_pos, 10))
+                if (posCheck(arm2_current_pos, 5))
                 {
                     imp_->phase5 = true;
                     mout() << "Pos 5 Complete" << std::endl;
@@ -4364,7 +4364,9 @@ namespace rivet
         std::copy(current_angle + 6, current_angle + 12, current_sa_angle);
         if(!imp_->init)
         {
-            double assem_pos[6]{ -0.622759, -0.102215, 0.08, PI, 0, PI };
+            //double assem_pos[6]{ -0.622759, -0.102215, 0.08, PI, 0, PI }; //12mm
+            double assem_pos[6]{ -0.622144, -0.206780, 0.08, PI, 0, PI  }; //10mm
+
             double init_angle[6]{0};
             model_a2.setOutputPos(assem_pos);
             if(model_a2.inverseKinematics())
@@ -4418,7 +4420,8 @@ namespace rivet
             if (!imp_->phase1)
             {
                 //Tool
-                double assem_pos[6]{ -0.622759, -0.102215, 0.070, PI, 0, PI  };
+                //double assem_pos[6]{ -0.622759, -0.102215, 0.070, PI, 0, PI  }; //12mm
+                double assem_pos[6]{ -0.622144, -0.206780, 0.055, PI, 0, PI  }; //10mm
                 double assem_angle[6]{ 0 };
                 double assem_rm[9]{ 0 };
                 eeA2.setP(assem_pos);
