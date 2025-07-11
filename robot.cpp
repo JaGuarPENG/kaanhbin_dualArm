@@ -1169,7 +1169,7 @@ namespace robot
     KAANH_DEFINE_BIG_FOUR_CPP(ModelTest)
 
 
-
+//Force comp
 	struct ModelComP::Imp {
 		bool target1_reached = false;
 		bool target2_reached = false;
@@ -3478,8 +3478,6 @@ namespace robot
 	KAANH_DEFINE_BIG_FOUR_CPP(ForceDrag)
 
 
-
-
     struct Demo::Imp {
 
         //Flag
@@ -5356,6 +5354,7 @@ namespace robot
     KAANH_DEFINE_BIG_FOUR_CPP(Search)
 
 
+// Impedence Controller
     struct Arm2PegInHole::Imp {
 
         //Flag
@@ -6223,8 +6222,6 @@ namespace robot
                         // da = (Fd-Fe-Bd*(v-vd)-k*(x-xd))/M
                         acc[i] = (-imp_->phase4_fd[i] + arm2_final_force[i] - imp_->phase4_B[i] * (imp_->v_c[i] - imp_->v_d[i])) / imp_->phase4_M[i];
                     }
-
-
                     for (int i = 0; i < 3; i++)
                     {
                         imp_->v_c[i] += acc[i] * dt;
@@ -6233,15 +6230,12 @@ namespace robot
                         arm2_current_pos[i] = dx[i] + arm2_current_pos[i];
 
                     }
-
                     //pose
                     for (int i = 1; i < 3; i++)
                     {
                         // Caculate Omega
                         ome[i] = (-imp_->phase4_fd[i + 3] + arm2_final_force[i + 3] - imp_->phase4_B[i + 3] * (imp_->v_c[i + 3] - imp_->v_d[i + 3])) / imp_->phase4_M[i + 3];
                     }
-
-
                     for (int i = 1; i < 3; i++)
                     {
                         // Angluar Velocity
@@ -6249,20 +6243,15 @@ namespace robot
                         velDeadZone(imp_->v_c[i + 3], max_vel[i + 3]);
                         dth[i] = imp_->v_c[i + 3] * dt;
                     }
-
                     double drm[9]{ 0 };
                     double rm_target[9]{ 0 };
                     double rm_c[9]{ 0 };
-
                     //Transform to rm
                     aris::dynamic::s_ra2rm(dth, drm);
-
                     //Current pe to rm
                     aris::dynamic::s_re2rm(arm2_current_pos + 3, rm_c, "321");
-
                     //Calcuate Future rm
                     aris::dynamic::s_mm(3, 3, 3, drm, rm_c, rm_target);
-
                     //Convert rm to pe
                     aris::dynamic::s_rm2re(rm_target, arm2_current_pos + 3, "321");
 
