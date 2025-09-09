@@ -57,6 +57,7 @@ ${PROJECT_SOURCE_DIR}/curve.cpp ${PROJECT_SOURCE_DIR}/curve.hpp ${PROJECT_SOURCE
 ${PROJECT_SOURCE_DIR}/datacomd.cpp ${PROJECT_SOURCE_DIR}/datacomd.hpp ${PROJECT_SOURCE_DIR}/rivetcomd.cpp ${PROJECT_SOURCE_DIR}/rivetcomd.hpp 
 ${PROJECT_SOURCE_DIR}/searchDir.cpp ${PROJECT_SOURCE_DIR}/searchDir.hpp
 ${PROJECT_SOURCE_DIR}/test.cpp ${PROJECT_SOURCE_DIR}/test.hpp
+${PROJECT_SOURCE_DIR}/movel.cpp ${PROJECT_SOURCE_DIR}/movel.hpp
 )
 
 target_include_directories(kaanhbin PUBLIC ${PROJECT_BINARY_DIR})
